@@ -9,7 +9,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._();
 
   static const _dbName = 'healthmate.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
 
   Database? _database;
 
@@ -33,12 +33,18 @@ class AppDatabase {
   Future<void> _onCreate(Database db, int version) async {
     await _createUserTable(db);
     await _createHealthRecordTable(db);
+    await _createDailyGoalsTable(db);
+    await _createMedicationsTable(db);
     await _seedData(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createUserTable(db);
+    }
+    if (oldVersion < 3) {
+      await _createDailyGoalsTable(db);
+      await _createMedicationsTable(db);
     }
   }
 
@@ -64,6 +70,35 @@ class AppDatabase {
         water INTEGER NOT NULL,
         mood INTEGER,
         notes TEXT
+      )
+    ''');
+  }
+
+  Future<void> _createDailyGoalsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS daily_goals(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userName TEXT NOT NULL,
+        stepsGoal INTEGER NOT NULL,
+        caloriesGoal INTEGER NOT NULL,
+        waterGoal INTEGER NOT NULL,
+        reminderEnabled INTEGER DEFAULT 1,
+        reminderTime TEXT
+      )
+    ''');
+  }
+
+  Future<void> _createMedicationsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS medications(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userName TEXT NOT NULL,
+        name TEXT NOT NULL,
+        dosage TEXT NOT NULL,
+        frequency TEXT NOT NULL,
+        time TEXT NOT NULL,
+        notes TEXT,
+        isActive INTEGER DEFAULT 1
       )
     ''');
   }

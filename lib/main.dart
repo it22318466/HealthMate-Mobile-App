@@ -5,11 +5,21 @@ import 'core/config/app_theme.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/logic/auth_controller.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
+import 'features/goals/data/repositories/goal_repository.dart';
+import 'features/goals/data/datasources/goal_dao.dart';
+import 'features/goals/logic/goal_controller.dart';
+import 'features/goals/presentation/screens/goals_screen.dart';
 import 'features/health_record/data/repositories/health_record_repository.dart';
 import 'features/health_record/logic/health_record_controller.dart';
 import 'features/health_record/presentation/screens/dashboard_screen.dart';
 import 'features/health_record/presentation/screens/record_form_screen.dart';
 import 'features/health_record/presentation/screens/record_list_screen.dart';
+import 'features/insights/presentation/screens/insights_screen.dart';
+import 'features/medication/data/repositories/medication_repository.dart';
+import 'features/medication/data/datasources/medication_dao.dart';
+import 'features/medication/logic/medication_controller.dart';
+import 'features/medication/presentation/screens/medication_form_screen.dart';
+import 'features/medication/presentation/screens/medication_list_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +44,24 @@ class HealthMateApp extends StatelessWidget {
             return healthController;
           },
         ),
+        ChangeNotifierProxyProvider<AuthController, GoalController>(
+          create: (_) => GoalController(GoalRepository(GoalDao())),
+          update: (_, authController, goalController) {
+            goalController ??= GoalController(GoalRepository(GoalDao()));
+            goalController.syncUser(authController.currentUser);
+            return goalController;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthController, MedicationController>(
+          create: (_) => MedicationController(MedicationRepository(MedicationDao())),
+          update: (_, authController, medicationController) {
+            medicationController ??= MedicationController(
+              MedicationRepository(MedicationDao()),
+            );
+            medicationController.syncUser(authController.currentUser);
+            return medicationController;
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'HealthMate',
@@ -55,7 +83,13 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
 
-  final _screens = const [DashboardScreen(), RecordListScreen()];
+  final _screens = const [
+    DashboardScreen(),
+    RecordListScreen(),
+    GoalsScreen(),
+    MedicationListScreen(),
+    InsightsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -84,20 +118,56 @@ class _HomeShellState extends State<HomeShell> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
-          NavigationDestination(icon: Icon(Icons.list_alt), label: 'Records'),
+          NavigationDestination(
+            icon: Icon(Icons.list_alt),
+            selectedIcon: Icon(Icons.list),
+            label: 'Records',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.flag_outlined),
+            selectedIcon: Icon(Icons.flag),
+            label: 'Goals',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.medication_outlined),
+            selectedIcon: Icon(Icons.medication),
+            label: 'Medications',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights),
+            label: 'Insights',
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const RecordFormScreen()));
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Add record'),
-      ),
+      floatingActionButton: _currentIndex == 1
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const RecordFormScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add record'),
+            )
+          : _currentIndex == 3
+              ? FloatingActionButton.extended(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const MedicationFormScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add medication'),
+                )
+              : null,
     );
   }
 }
