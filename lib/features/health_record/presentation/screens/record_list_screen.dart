@@ -115,6 +115,8 @@ class RecordListScreen extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context, HealthRecord record) {
+    final messenger = ScaffoldMessenger.of(context);
+
     showDialog<void>(
       context: context,
       builder: (context) {
@@ -130,6 +132,9 @@ class RecordListScreen extends StatelessWidget {
               onPressed: () {
                 context.read<HealthRecordController>().deleteRecord(record.id!);
                 Navigator.of(context).pop();
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Record deleted successfully')),
+                );
               },
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,

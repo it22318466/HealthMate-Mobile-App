@@ -153,6 +153,8 @@ class MedicationListScreen extends StatelessWidget {
     MedicationController controller,
     Medication medication,
   ) {
+    final messenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -167,6 +169,11 @@ class MedicationListScreen extends StatelessWidget {
             onPressed: () async {
               await controller.deleteMedication(medication.id!);
               if (context.mounted) Navigator.pop(context);
+              messenger.showSnackBar(
+                const SnackBar(
+                  content: Text('Medication deleted successfully'),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

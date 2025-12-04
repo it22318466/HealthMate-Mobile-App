@@ -106,7 +106,13 @@ class _HomeShellState extends State<HomeShell> {
         actions: [
           IconButton(
             tooltip: 'Sign out',
-            onPressed: () => context.read<AuthController>().logout(),
+            onPressed: () {
+              final messenger = ScaffoldMessenger.of(context);
+              context.read<AuthController>().logout();
+              messenger.showSnackBar(
+                const SnackBar(content: Text('Signed out successfully')),
+              );
+            },
             icon: const Icon(Icons.logout),
           ),
         ],

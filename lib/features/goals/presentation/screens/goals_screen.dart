@@ -156,6 +156,7 @@ class GoalsScreen extends StatelessWidget {
       text: currentGoal?.reminderTime ?? '09:00',
     );
     var reminderEnabled = currentGoal?.reminderEnabled ?? true;
+    final messenger = ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
@@ -219,7 +220,7 @@ class GoalsScreen extends StatelessWidget {
               onPressed: () async {
                 final authController = context.read<AuthController>();
                 if (authController.currentUser == null) return;
-                
+
                 final goal = DailyGoal(
                   id: currentGoal?.id,
                   userName: authController.currentUser!.fullName,
@@ -229,8 +230,18 @@ class GoalsScreen extends StatelessWidget {
                   reminderEnabled: reminderEnabled,
                   reminderTime: reminderEnabled ? reminderTimeController.text : null,
                 );
+
+                final isNew = currentGoal == null;
                 await controller.saveGoal(goal);
-                if (context.mounted) Navigator.pop(context);
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isNew ? 'Goals saved successfully' : 'Goals updated successfully',
+                    ),
+                  ),
+                );
               },
               child: const Text('Save'),
             ),

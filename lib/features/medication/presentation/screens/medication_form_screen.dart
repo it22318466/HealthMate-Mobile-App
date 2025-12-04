@@ -157,6 +157,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
     if (authController.currentUser == null) return;
 
     final controller = context.read<MedicationController>();
+    final messenger = ScaffoldMessenger.of(context);
     final medication = Medication(
       id: widget.medication?.id,
       userName: authController.currentUser!.fullName,
@@ -168,7 +169,8 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
       isActive: _isActive,
     );
 
-    if (widget.medication == null) {
+    final isNew = widget.medication == null;
+    if (isNew) {
       await controller.addMedication(medication);
     } else {
       await controller.updateMedication(medication);
@@ -176,6 +178,13 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
 
     if (!mounted) return;
     Navigator.of(context).pop();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          isNew ? 'Medication added successfully' : 'Medication updated successfully',
+        ),
+      ),
+    );
   }
 }
 

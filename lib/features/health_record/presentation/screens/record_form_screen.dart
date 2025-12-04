@@ -169,6 +169,7 @@ class _RecordFormScreenState extends State<RecordFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authUser = context.read<AuthController>().currentUser;
+    final messenger = ScaffoldMessenger.of(context);
 
     final record = HealthRecord(
       id: widget.existingRecord?.id,
@@ -185,10 +186,17 @@ class _RecordFormScreenState extends State<RecordFormScreen> {
     final controller = context.read<HealthRecordController>();
     if (widget.existingRecord == null) {
       await controller.addRecord(record);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Record added successfully')),
+      );
     } else {
       await controller.updateRecord(record);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Record updated successfully')),
+      );
     }
-    if (!mounted) return;
     Navigator.of(context).pop();
   }
 }
